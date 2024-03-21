@@ -1,84 +1,89 @@
-#include <stdint.h>
+/*
+ * Muhammet Tayyip Çankaya
+ * HC 06 Bluetooth
+ */
 #include <stdbool.h>
-#include "inc/hw_memmap.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <inttypes.h>
+
+#include "inc/hw_ints.h"
 #include "inc/hw_types.h"
-#include "inc/tm4c123gh6pm.h"
+#include "inc/hw_memmap.h"
 
 #include "driverlib/sysctl.h"
-#include "driverlib/gpio.h"  //Contiene las API para configurar y manejar los GPIO
-#include "driverlib/interrupt.h"
+#include "driverlib/gpio.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/uart.h"
-#include "utils/uartstdio.h"  //manejo de UART
-#include "utils/uartstdio.c"
-#include "inc/hw_uart.h"
-#include <string.h>
-#include "driverlib/interrupt.h"  //Se proporcionan API para habilitar y
-//habilitar interrupciones, registrar manejadores de interrupciones y
-//establecer la prioridad de las interrupciones.git
 
-char car;
-int i =0;
-uint8_t Status;
-uint32_t ui32Status;
+void bluetoothSendMessage(char *array);
 
-void UARTIntHandler(void) {
-  ui32Status = UARTIntStatus(UART1_BASE, true);  //get interrupt staturs
-  UARTIntClear(UART1_BASE, ui32Status);          //Clear the asserted interrupts
-  while (UARTCharsAvail(UART1_BASE)) {
-    car = UARTCharGetNonBlocking(UART1_BASE);
-    UARTCharPut(UART1_BASE, car);
-    SysCtlDelay(SysCtlClockGet() / (1000 * 3));  //delay ~1msec
-  }
-}
-int main(void) {
-  SysCtlClockSet(SYSCTL_XTAL_16MHZ | SYSCTL_SYSDIV_2_5);
-  //*************************UART**********************//
-  SysCtlPeripheralEnable(SYSCTL_PERIPH_UART1);
-  SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
-  GPIOPinTypeUART(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5);
-  //Pines para conectar el modulo Bluetooth PC4 y PC5
-  GPIOPinConfigure(GPIO_PC4_U1RX);
-  GPIOPinConfigure(GPIO_PC5_U1TX);
-  UARTClockSourceSet(UART1_BASE, UART_CLOCK_PIOSC);
-  UARTStdioConfig(1, 9600, 16000000);
-  //************************GPIO*******************************//
-  SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
-  SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-  SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
-  SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
-  SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-  GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4);
-  GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_6 | GPIO_PIN_7);
-  GPIOPinTypeGPIOOutput(GPIO_PORTE_BASE, GPIO_PIN_0);
-  GPIOPinTypeGPIOOutput(GPIO_PORTC_BASE, GPIO_PIN_7);
-  GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2 | GPIO_PIN_3);
-  //*********************Interrupcin*****************************//
-  IntMasterEnable();
-  IntEnable(INT_UART1);
-  UARTIntEnable(UART1_BASE, UART_INT_RX | UART_INT_RT);
+/* HC06 BLUETOOTH
+ * TX-->PC6
+ * RX-->PC7*/
 
-  while (1) {
-//SysCtlDelay(8000000);
- //     UARTprintf("NINGUNO");
-   //   UARTprintf("\n");
-    switch (car) {
-      case 'x':
-          GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2 | GPIO_PIN_3, 2 );
-        break;
-      case 'y':
-          GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2 | GPIO_PIN_3, 4 );
-     break;
-     case 'z':
-         GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2 | GPIO_PIN_3, 8);
-       break;
-     case 'a':
-         GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2 | GPIO_PIN_3, 12 );
-         break;
+int main(void)
+{
+    unsigned char data;
+    int LED;
+
+    SysCtlClockSet(SYSCTL_SYSDIV_4|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|SYSCTL_OSC_MAIN);
+
+    //HC06 BLUETOOTH Pinleri
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
+    GPIOPinConfigure(GPIO_PC6_U3RX);
+    GPIOPinConfigure(GPIO_PC7_U3TX);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART3);
+    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7);
+    GPIOPinTypeUART(GPIO_PORTC_BASE,GPIO_PIN_6|GPIO_PIN_7);
+    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);
+    UARTConfigSetExpClk(UART3_BASE,SysCtlClockGet(),9600,(UART_CONFIG_WLEN_8 | UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_ONE));
+    UARTEnable(UART3_BASE);
+
+
+
+    while(1){
+        while(!UARTCharsAvail(UART3_BASE));
+        data=UARTCharGetNonBlocking(UART3_BASE);
+        LED=0;
+        if(data=='F'){
+            LED = 2;
+            GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, LED);
+            GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7,6);
+            bluetoothSendMessage("\nTiva send = RED\n");
+            SysCtlDelay(100);}
+        else if(data=='B'){
+            LED = 4;
+            GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, LED);
+            GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7,9);
+            bluetoothSendMessage("\nTiva send = BLUE\n");
+            SysCtlDelay(100);}
+        else if(data=='R'){
+            LED = 8;
+            GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, LED);
+            GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7,10);
+            bluetoothSendMessage("\nTiva send = GREEN\n");
+            SysCtlDelay(100);}
+        else if(data=='L'){
+            LED = 14;
+            GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, LED);
+            GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7,5);
+            bluetoothSendMessage("\nTiva send = WHITE\n");
+            SysCtlDelay(100);}
+        else{
+            LED = 0;
+            GPIOPinWrite(GPIO_PORTF_BASE,GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, LED);
+            GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7,LED);
+            bluetoothSendMessage("\nTiva send = NO\n");
+            SysCtlDelay(100);}
        }
-       car = UARTCharGetNonBlocking(UART1_BASE);
-       UARTIntClear(UART1_BASE, ui32Status);  //Clear
-    }
-  }
+    UARTDisable(UART1_BASE);
+}
 
 
+void bluetoothSendMessage(char *array){
+    while(*array){
+        UARTCharPut(UART3_BASE,*array);
+        array++;}}
