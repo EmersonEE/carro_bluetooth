@@ -25,6 +25,8 @@ void ApagarLucesDelanteras();
 void ApagarLucesTraseras();
 void Bocina();
 void DireccionesTodas();
+void ApagarBocina();
+void ConfiguracionLuces();
 /* HC06 BLUETOOTH
  * TX-->PC6
  * RX-->PC7*/
@@ -32,6 +34,7 @@ void DireccionesTodas();
 int LED;
 bool STLD = false;
 bool STLB = false;
+bool STBO = false;
 
 unsigned char data;
 
@@ -60,24 +63,10 @@ int main(void)
 
   while (1)
   {
-
     LeerBluetooth();
     DireccionesTodas();
     LED = 0;
-    if (STLD == true && STLB == true)
-    {
-      LeerBluetooth();
-      DireccionesTodas(data);
-      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 192);
-    }
-    else if (STLD == false && STLB == true)
-    {
-      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b01000000);
-    }
-    else if (STLD == true && STLB == false)
-    {
-      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b10000000);
-    }
+    ConfiguracionLuces();
   };
   UARTDisable(UART1_BASE);
 }
@@ -160,6 +149,12 @@ void ApagarLucesTraseras()
 void Bocina()
 {
   GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 32);
+  STBO = true;
+}
+
+void ApagarBocina(){
+    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0);
+    STBO = false;
 }
 void bluetoothSendMessage(char *array)
 {
@@ -205,10 +200,51 @@ void DireccionesTodas()
   {
     ApagarLucesTraseras();
   }
+  else if (data == 'V')
+  {
+    Bocina();
+  }
+  else if (data == 'v')
+  {
+    ApagarBocina();
+  }
   else
   {
     Stop();
   }
+}
+
+void ConfiguracionLuces(){
+    if (STLD == true && STLB == true && STBO == true)
+    {
+      LeerBluetooth();
+      DireccionesTodas(data);
+      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b11100000);
+    }
+    else if (STLD == false && STLB == false && STBO == true)
+    {
+      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b00100000);
+    }
+    else if (STLD == false && STLB == true && STBO == false)
+    {
+      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b01000000);
+    }
+    else if (STLD == false && STLB == true && STBO == true)
+    {
+      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b01100000);
+    }
+    else if (STLD == true && STLB == false && STBO == false)
+    {
+      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b10000000);
+    }
+    else if (STLD == true && STLB == false && STBO == true)
+    {
+      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b10100000);
+    }
+    else if (STLD == true && STLB == true && STBO == false)
+    {
+      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b11000000);
+    }
 }
 void LeerBluetooth()
 {
