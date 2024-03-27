@@ -1,3 +1,4 @@
+// Librerias
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -11,36 +12,10 @@
 #include "driverlib/gpio.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/uart.h"
-
-
-#include <stdint.h>
-#include <stdbool.h>
+#include "driverlib/pwm.h"
 #include "inc/hw_gpio.h"
-#include "inc/hw_types.h"
-#include "inc/hw_memmap.h"
-#include "driverlib/sysctl.h"
-#include "driverlib/pin_map.h"
-#include "driverlib/gpio.h"
-#include "driverlib/pwm.h"
-#include "inc/hw_memmap.h"
-#include "inc/hw_types.h"
-#include "driverlib/pwm.h"
-#include "driverlib/sysctl.h"
-#include "driverlib/gpio.h"
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <inttypes.h>
 
-#include "inc/hw_ints.h"
-#include "inc/hw_types.h"
-#include "inc/hw_memmap.h"
-
-#include "driverlib/sysctl.h"
-#include "driverlib/gpio.h"
-#include "driverlib/pin_map.h"
-#include "driverlib/uart.h"
-
+// Mandar a llamar los sub-procesos
 void bluetoothSendMessage(char *array);
 void Adelante();
 void Retroceder();
@@ -59,7 +34,7 @@ void ConfiguracionLuces();
 /* HC06 BLUETOOTH
  * TX-->PC6
  * RX-->PC7*/
-
+// Variables usadas
 int LED;
 bool STLD = false;
 bool STLB = false;
@@ -72,11 +47,15 @@ int main(void)
 
   SysCtlClockSet(SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
 
-  // HC06 BLUETOOTH Pinleri
+  // Configuracion HC06 BLUETOOTH
   SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
   GPIOPinConfigure(GPIO_PC6_U3RX);
   GPIOPinConfigure(GPIO_PC7_U3TX);
+  GPIOPinTypeUART(GPIO_PORTC_BASE, GPIO_PIN_6 | GPIO_PIN_7);
+  UARTConfigSetExpClk(UART3_BASE, SysCtlClockGet(), 9600, (UART_CONFIG_WLEN_8 | UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_ONE));
+  UARTEnable(UART3_BASE);
 
+  // Configuracion de Pines
   SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
   SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
   SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
@@ -86,49 +65,45 @@ int main(void)
   GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3);
   GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7);
 
-  GPIOPinTypeUART(GPIO_PORTC_BASE, GPIO_PIN_6 | GPIO_PIN_7);
-  UARTConfigSetExpClk(UART3_BASE, SysCtlClockGet(), 9600, (UART_CONFIG_WLEN_8 | UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_ONE));
-  UARTEnable(UART3_BASE);
+  // Configurando el PWM
+  // Configure PWM Clock
+  SysCtlPWMClockSet(SYSCTL_PWMDIV_1);
 
+  // Habilitar perifericos
+  // Cambiado para usar el puerto D
+  SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
+  SysCtlPeripheralEnable(SYSCTL_PERIPH_PWM1);
+  // Configurando PD0, PD1 como salidas PWM
+  GPIOPinConfigure(GPIO_PD0_M1PWM0);
+  GPIOPinConfigure(GPIO_PD1_M1PWM1);
+  GPIOPinTypePWM(GPIO_PORTD_BASE, GPIO_PIN_0 | GPIO_PIN_1);
 
-  // Configure PWM Clock to match system
-     SysCtlPWMClockSet(SYSCTL_PWMDIV_1);
+  // Opciones PWM
+  PWMGenConfigure(PWM1_BASE, PWM_GEN_0, PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC);
+  PWMGenConfigure(PWM1_BASE, PWM_GEN_1, PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC);
 
-     // Enable the peripherals used by this program.
-     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD); // Changed to use port D
-     SysCtlPeripheralEnable(SYSCTL_PERIPH_PWM1); // The Tiva Launchpad has two modules (0 and 1). Module 1 covers the LED pins
-     // Configure PD0, PD1, PD2 Pins as PWM
-     GPIOPinConfigure(GPIO_PD0_M1PWM0); // Changed to use port D pins
-     GPIOPinConfigure(GPIO_PD1_M1PWM1); // Changed to use port D pins
-    // GPIOPinConfigure(GPIO_PD2_M1PWM2); // Changed to use port D pins
-     GPIOPinTypePWM(GPIO_PORTD_BASE, GPIO_PIN_0 | GPIO_PIN_1); // Changed to use port D pins
+  // Colocar el periodo
+  PWMGenPeriodSet(PWM1_BASE, PWM_GEN_0, 400);
+  PWMGenPeriodSet(PWM1_BASE, PWM_GEN_1, 400);
 
-     // Configure PWM Options
-     PWMGenConfigure(PWM1_BASE, PWM_GEN_0, PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC);
-     PWMGenConfigure(PWM1_BASE, PWM_GEN_1, PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC);
+  // Set PWM duty-50% (Period /2)
+  PWMPulseWidthSet(PWM1_BASE, PWM_OUT_0, 100);
+  PWMPulseWidthSet(PWM1_BASE, PWM_OUT_1, 100);
 
-     // Set the Period (expressed in clock ticks)
-     PWMGenPeriodSet(PWM1_BASE, PWM_GEN_0, 400);
-     PWMGenPeriodSet(PWM1_BASE, PWM_GEN_1, 400);
-
-     // Set PWM duty-50% (Period /2)
-     PWMPulseWidthSet(PWM1_BASE, PWM_OUT_0, 100);
-     PWMPulseWidthSet(PWM1_BASE, PWM_OUT_1, 100);
-    // PWMPulseWidthSet(PWM1_BASE, PWM_OUT_2, 100);
-
-     // Enable the PWM generator
-     PWMGenEnable(PWM1_BASE, PWM_GEN_0);
-     PWMGenEnable(PWM1_BASE, PWM_GEN_1);
-
-     // Turn on the Output pins
-     PWMOutputState(PWM1_BASE, PWM_OUT_0_BIT | PWM_OUT_1_BIT | PWM_OUT_2_BIT, true);
+  // Habilitar el  PWM generator
+  PWMGenEnable(PWM1_BASE, PWM_GEN_0);
+  PWMGenEnable(PWM1_BASE, PWM_GEN_1);
+  // Turn on the Output pins
+  PWMOutputState(PWM1_BASE, PWM_OUT_0_BIT | PWM_OUT_1_BIT | PWM_OUT_2_BIT, true);
 
   while (1)
   {
+    // Mandar a llamar los procesos
     LeerBluetooth();
     DireccionesTodas();
     LED = 0;
     ConfiguracionLuces();
+    // Salida de PWM
     PWMPulseWidthSet(PWM1_BASE, PWM_OUT_0, pwmNow);
     PWMPulseWidthSet(PWM1_BASE, PWM_OUT_1, pwmNow);
   };
@@ -216,9 +191,10 @@ void Bocina()
   STBO = true;
 }
 
-void ApagarBocina(){
-    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0);
-    STBO = false;
+void ApagarBocina()
+{
+  GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0);
+  STBO = false;
 }
 void bluetoothSendMessage(char *array)
 {
@@ -272,65 +248,88 @@ void DireccionesTodas()
   {
     ApagarBocina();
   }
-  else         if (data == '1')
+  else if (data == '1')
   {
-    pwmNow =40;
-  }else if(data == '2'){
-      pwmNow = 80;
-  }else if(data == '3'){
-      pwmNow = 120;
-  }else if(data == '4'){
-      pwmNow = 160;
-  }else if(data == '5'){
-      pwmNow = 200;
-  }else if(data == '6'){
-      pwmNow = 240;
-  }else if(data == '7'){
-      pwmNow = 280;
-  }else if(data == '8'){
-      pwmNow = 320;
-  }else if(data == '9'){
-      pwmNow = 360;
-  }else if(data == 'q'){
-      pwmNow = 400;
-  }else if(data == '0'){
-      pwmNow = 0;
-  }else {
+    pwmNow = 40;
+  }
+  else if (data == '2')
+  {
+    pwmNow = 80;
+  }
+  else if (data == '3')
+  {
+    pwmNow = 120;
+  }
+  else if (data == '4')
+  {
+    pwmNow = 160;
+  }
+  else if (data == '5')
+  {
+    pwmNow = 200;
+  }
+  else if (data == '6')
+  {
+    pwmNow = 240;
+  }
+  else if (data == '7')
+  {
+    pwmNow = 280;
+  }
+  else if (data == '8')
+  {
+    pwmNow = 320;
+  }
+  else if (data == '9')
+  {
+    pwmNow = 360;
+  }
+  else if (data == 'q')
+  {
+    pwmNow = 400;
+  }
+  else if (data == '0')
+  {
+    pwmNow = 0;
+  }
+  else
+  {
     Stop();
   }
 }
 
-void ConfiguracionLuces(){
-    if (STLD == true && STLB == true && STBO == true)
-    {
-      LeerBluetooth();
-      DireccionesTodas(data);
-      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b11100000);
-    }
-    else if (STLD == false && STLB == false && STBO == true)
-    {
-      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b00100000);
-    }
-    else if (STLD == false && STLB == true && STBO == false)
-    {
-      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b01000000);
-    }
-    else if (STLD == false && STLB == true && STBO == true)
-    {
-      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b01100000);
-    }
-    else if (STLD == true && STLB == false && STBO == false)
-    {
-      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b10000000);
-    }
-    else if (STLD == true && STLB == false && STBO == true)
-    {
-      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b10100000);
-    }
-    else if (STLD == true && STLB == true && STBO == false)
-    {
-      GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b11000000);
-    }
+void ConfiguracionLuces()
+{
+  if (STLD == true && STLB == true && STBO == true)
+  {
+    LeerBluetooth();
+    DireccionesTodas();
+    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b11100000);
+  }
+  else if (STLD == false && STLB == false && STBO == true)
+  {
+    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b00100000);
+  }
+  else if (STLD == false && STLB == true && STBO == false)
+  {
+    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b01000000);
+  }
+  else if (STLD == false && STLB == true && STBO == true)
+  {
+    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b01100000);
+  }
+  else if (STLD == true && STLB == false && STBO == false)
+  {
+    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b10000000);
+  }
+  else if (STLD == true && STLB == false && STBO == true)
+  {
+    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b10100000);
+  }
+  else if (STLD == true && STLB == true && STBO == false)
+  {
+    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b11000000);
+  }
 }
 void LeerBluetooth()
 {
