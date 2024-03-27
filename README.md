@@ -16,6 +16,7 @@ Proyecto final del curso de Practica Electonica 3 - **USAC**
 - [Placa KiCad](#placa-kicad)
 - [Video de Funcionamiento](#video-del-funcionamiento)
 
+
 # Introducción
 
 # Tiva C TM4C123GH6PM
@@ -93,4 +94,8 @@ codigo para agregar videos
 <!--
   <iframe width="560" height="315" src="https://www.youtube.com/embed/HOG0K7A2Ea4" title="YouTube video player"
     frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen></iframe> -->
+    allowfullscreen></iframe> 
+    
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/LHhnxjv8vxk?si=h4xPD6NWSBa-INWs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    
+    -->
