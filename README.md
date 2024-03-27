@@ -4,18 +4,15 @@ Proyecto final del curso de Practica Electonica 3 - **USAC**
 
 ![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white) ![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white) ![Mega.nz](https://img.shields.io/badge/Mega-%23D90007.svg?style=for-the-badge&logo=Mega&logoColor=white) ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black) [![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/EmersonPrez15)
 
-
-
-
 # Temario Proyecto
 
 - [Introducción](#introducción)
 - [TIVA C TM4C123GH6PM](#tiva-c-tm4c123gh6pm)
 - [Materiales](#materiales)
 - [Bluetooth RC Controller](#bluetooth-rc-controller)
+- [PWM](#video-del-funcionamiento)
 - [Placa KiCad](#placa-kicad)
 - [Video de Funcionamiento](#video-del-funcionamiento)
-
 
 # Introducción
 
@@ -45,7 +42,7 @@ Para este proyecto se utilizaron materiales importantes como el modulo bluetooth
 
 - **Módulo Bluetooth HC-06**:
 El módulo Bluetooth HC-06 es un dispositivo que permite la comunicación inalámbrica mediante la tecnología Bluetooth. Este módulo actúa como un puente entre dispositivos que utilizan Bluetooth y microcontroladores u otros sistemas embebidos. Es comúnmente utilizado en proyectos de electrónica para habilitar la comunicación entre un microcontrolador y un dispositivo móvil, como un teléfono inteligente o una tableta.
-<div style="text-align:center;">
+<div align="center"">
 <img src="https://laelectronica.com.gt/image/cache/catalog/Productos/M%C3%B3dulos/modulo-bluetooth-hc-06-2-1200x1200.jpg" alt="Descripción de la imagen" width="150" height="150" />
 </div>
 
@@ -53,7 +50,7 @@ El módulo Bluetooth HC-06 es un dispositivo que permite la comunicación inalá
 
 - **Driver puente H L298N**:
 El driver puente H L298N es un circuito integrado utilizado para controlar motores de corriente continua (DC) y motores paso a paso. Funciona como un puente H, que es un circuito que permite controlar la dirección y la velocidad de un motor DC. El L298N puede manejar corrientes de hasta 2 amperios por canal y voltajes de alimentación de hasta 35 voltios.
-<div style="text-align:center;">
+<div align="center"">
 <img src="https://m.media-amazon.com/images/I/61VkNn0PcaL.jpg" alt="Descripción de la imagen" width="150" height="150" />
 </div>
 
@@ -61,7 +58,7 @@ El driver puente H L298N es un circuito integrado utilizado para controlar motor
 
 - **Motoreductores**:
 Los motoreductores son dispositivos que combinan un motor eléctrico con una caja de engranajes para reducir la velocidad y aumentar el torque de salida. Estos son componentes comunes en una amplia variedad de aplicaciones, desde robots y vehículos controlados por radio hasta equipos industriales y electrodomésticos.
-<div style="text-align:center;">
+<div align="center"">
 <img src="https://http2.mlstatic.com/D_NQ_NP_791502-MLM48603564951_122021-O.webp" alt="Descripción de la imagen" width="150" height="150" />
 </div>
 
@@ -73,8 +70,21 @@ La aplicación que se utilizo para poder controlar el dispositivo fue **[Bluetoo
 
 **[Descarga la Aplicación](https://mega.nz/file/lItFECAC#N41DOoMR8TuIGPPzliTAuHlfmP3obIDxUFIn1bvfIek)**
 
-<div style="text-align:center;">
+<div align="center"">
 <img src="https://images.sftcdn.net/images/t_app-cover-l,f_auto/p/4e2b2251-80eb-4e9b-8a72-1dc68041c662/3160506404/bluetooth-rc-car-screenshot.png" alt="Descripción de la imagen" width="300" height="150" />
+</div>
+
+[Temario](#temario-proyecto)
+
+# PWM
+
+El PWM (Pulse Width Modulation) se utlizo para poder controlar la velocidad de los motoreductores ya que el PWM es una técnica utilizada en electrónica para controlar la cantidad de energía entregada a un dispositivo o carga, como por ejemplo un motor, una bombilla LED o un altavoz.
+Consiste en variar el ancho de un pulso de señal eléctrica (la duración en que la señal está en alto) mientras se mantiene constante la frecuencia de repetición de estos pulsos.
+
+<!-- ![Pinout de la Tiva](https://solectroshop.com/img/cms/PWM/Analogico_deseado.webp) -->
+
+<div align="center"">
+<img src="https://solectroshop.com/img/cms/PWM/Analogico_deseado.webp" alt="Descripción de la imagen" width="400" height="225" />
 </div>
 
 [Temario](#temario-proyecto)
@@ -94,8 +104,8 @@ codigo para agregar videos
 <!--
   <iframe width="560" height="315" src="https://www.youtube.com/embed/HOG0K7A2Ea4" title="YouTube video player"
     frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen></iframe> 
-    
+    allowfullscreen></iframe>
+
     <iframe width="560" height="315" src="https://www.youtube.com/embed/LHhnxjv8vxk?si=h4xPD6NWSBa-INWs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-    
+
     -->
