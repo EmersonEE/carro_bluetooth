@@ -109,3 +109,5 @@ codigo para agregar videos
     <iframe width="560" height="315" src="https://www.youtube.com/embed/LHhnxjv8vxk?si=h4xPD6NWSBa-INWs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
     -->
+<!-- Agregar iamagenes centradas con links
+<div align="center"><a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br /></div> -->
