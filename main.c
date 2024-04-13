@@ -5,6 +5,7 @@
 
 #include "inc/hw_ints.h"
 #include "inc/hw_types.h"
+#include "inc/tm4c123gh6pm.h"
 #include "inc/hw_memmap.h"
 
 #include "driverlib/sysctl.h"
@@ -13,7 +14,6 @@
 #include "driverlib/uart.h"
 
 #include "driverlib/pwm.h"
-
 
 void bluetoothSendMessage(char *array);
 void Adelante();
@@ -30,6 +30,7 @@ void Bocina();
 void DireccionesTodas();
 void ApagarBocina();
 void ConfiguracionLuces();
+void Sensores();
 /* HC06 BLUETOOTH
  * TX-->PC6
  * RX-->PC7*/
@@ -40,6 +41,7 @@ bool STLB = false;
 bool STBO = false;
 unsigned long pwmNow = 0;
 unsigned char data;
+int valor = 0;
 
 int main(void)
 {
@@ -56,7 +58,12 @@ int main(void)
   SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
   SysCtlPeripheralEnable(SYSCTL_PERIPH_UART3);
 
+  GPIO_PORTF_LOCK_R = GPIO_LOCK_KEY;
+  GPIO_PORTF_CR_R = 0x0f;
   GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3);
+  // GPIOPinTypeGPIOInput(GPIO_PORTB_BASE, GPIO_PIN_4 | GPIO_PIN_5); // Entradas
+  GPIOPinTypeGPIOInput(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4);
+  GPIOPadConfigSet(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
   GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3);
   GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7);
 
@@ -98,8 +105,11 @@ int main(void)
 
   while (1)
   {
+
+
     LeerBluetooth();
     DireccionesTodas();
+
     LED = 0;
     ConfiguracionLuces();
     PWMPulseWidthSet(PWM1_BASE, PWM_OUT_0, pwmNow);
@@ -136,7 +146,7 @@ void Derecha()
 }
 void Izquierda()
 {
-  LED = 14;
+  LED = 12;
   GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, LED);
   GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, 0b00000110);
   bluetoothSendMessage("\nTiva send = IZQUIERDA\n");
@@ -205,7 +215,6 @@ void bluetoothSendMessage(char *array)
 
 void DireccionesTodas()
 {
-
   if (data == 'F')
   {
     Adelante();
@@ -329,9 +338,38 @@ void ConfiguracionLuces()
     GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b11000000);
   }
 }
+void Sensores(){
+    valor = GPIOPinRead(GPIO_PORTF_BASE, GPIO_PIN_0|GPIO_PIN_4);
+    if ( valor ==  1)
+    {
+    Retroceder();
+    SysCtlDelay(10000000);
+
+    }
+    else if ( valor ==  16)
+    {
+    Retroceder();
+    SysCtlDelay(10000000);
+    Adelante();
+    SysCtlDelay(10000);
+    }
+    else if ( valor ==  0)
+    {
+    Retroceder();
+    SysCtlDelay(10000000);
+    }
+    else
+    {
+        DireccionesTodas();
+    }
+
+}
 void LeerBluetooth()
 {
-  while (!UARTCharsAvail(UART3_BASE))
-    ;
+  while (!UARTCharsAvail(UART3_BASE)){
+      Sensores();
+  }
   data = UARTCharGetNonBlocking(UART3_BASE);
 }
+
+
