@@ -56,6 +56,7 @@ int main(void)
   SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
   SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
   SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+  SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD); // Changed to use port D
   SysCtlPeripheralEnable(SYSCTL_PERIPH_UART3);
 
   GPIO_PORTF_LOCK_R = GPIO_LOCK_KEY;
@@ -70,12 +71,12 @@ int main(void)
   GPIOPinTypeUART(GPIO_PORTC_BASE, GPIO_PIN_6 | GPIO_PIN_7);
   UARTConfigSetExpClk(UART3_BASE, SysCtlClockGet(), 9600, (UART_CONFIG_WLEN_8 | UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_ONE));
   UARTEnable(UART3_BASE);
-
+  GPIOPinTypeGPIOInput(GPIO_PORTD_BASE, GPIO_PIN_2);
+  GPIOPadConfigSet(GPIO_PORTD_BASE, GPIO_PIN_2, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
   // Configure PWM Clock to match system
   SysCtlPWMClockSet(SYSCTL_PWMDIV_1);
 
   // Enable the peripherals used by this program.
-  SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD); // Changed to use port D
   SysCtlPeripheralEnable(SYSCTL_PERIPH_PWM1);  // The Tiva Launchpad has two modules (0 and 1). Module 1 covers the LED pins
   // Configure PD0, PD1, PD2 Pins as PWM
   GPIOPinConfigure(GPIO_PD0_M1PWM0);                        // Changed to use port D pins
@@ -339,7 +340,7 @@ void ConfiguracionLuces()
   }
 }
 void Sensores(){
-    valor = GPIOPinRead(GPIO_PORTF_BASE, GPIO_PIN_0|GPIO_PIN_4);
+    valor = GPIOPinRead(GPIO_PORTD_BASE, GPIO_PIN_2);
     if ( valor ==  1)
     {
     Retroceder();
