@@ -30,7 +30,7 @@ void Bocina();
 void DireccionesTodas();
 void ApagarBocina();
 void ConfiguracionLuces();
-// void Sensores();
+void Sensores();
 /* HC06 BLUETOOTH
  * TX-->PC6
  * RX-->PC7*/
@@ -77,7 +77,7 @@ int main(void)
   SysCtlPWMClockSet(SYSCTL_PWMDIV_1);
 
   // Enable the peripherals used by this program.
-  SysCtlPeripheralEnable(SYSCTL_PERIPH_PWM1); // The Tiva Launchpad has two modules (0 and 1). Module 1 covers the LED pins
+  SysCtlPeripheralEnable(SYSCTL_PERIPH_PWM1);  // The Tiva Launchpad has two modules (0 and 1). Module 1 covers the LED pins
   // Configure PD0, PD1, PD2 Pins as PWM
   GPIOPinConfigure(GPIO_PD0_M1PWM0);                        // Changed to use port D pins
   GPIOPinConfigure(GPIO_PD1_M1PWM1);                        // Changed to use port D pins
@@ -108,14 +108,13 @@ int main(void)
   {
 
 
-      LeerBluetooth();
-      DireccionesTodas();
+    LeerBluetooth();
+    DireccionesTodas();
 
-      LED = 0;
-      ConfiguracionLuces();
-      PWMPulseWidthSet(PWM1_BASE, PWM_OUT_0, pwmNow);
-      PWMPulseWidthSet(PWM1_BASE, PWM_OUT_1, pwmNow);
-
+    LED = 0;
+    ConfiguracionLuces();
+    PWMPulseWidthSet(PWM1_BASE, PWM_OUT_0, pwmNow);
+    PWMPulseWidthSet(PWM1_BASE, PWM_OUT_1, pwmNow);
   };
   UARTDisable(UART1_BASE);
 }
@@ -340,9 +339,38 @@ void ConfiguracionLuces()
     GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b11000000);
   }
 }
+void Sensores(){
+    valor = GPIOPinRead(GPIO_PORTD_BASE, GPIO_PIN_2);
+    if ( valor ==  1)
+    {
+    Retroceder();
+    SysCtlDelay(10000000);
 
+    }
+    else if ( valor ==  16)
+    {
+    Retroceder();
+    SysCtlDelay(10000000);
+    Adelante();
+    SysCtlDelay(10000);
+    }
+    else if ( valor ==  0)
+    {
+    Retroceder();
+    SysCtlDelay(10000000);
+    }
+    else
+    {
+        DireccionesTodas();
+    }
+
+}
 void LeerBluetooth()
 {
-  while (!UARTCharsAvail(UART3_BASE))
-    data = UARTCharGetNonBlocking(UART3_BASE);
+  while (!UARTCharsAvail(UART3_BASE)){
+      Sensores();
+  }
+  data = UARTCharGetNonBlocking(UART3_BASE);
 }
+
+
