@@ -30,7 +30,7 @@ void Bocina();
 void DireccionesTodas();
 void ApagarBocina();
 void ConfiguracionLuces();
-void Sensores();
+//void Sensores();
 /* HC06 BLUETOOTH
  * TX-->PC6
  * RX-->PC7*/
@@ -107,6 +107,11 @@ int main(void)
   while (1)
   {
 
+          valor = GPIOPinRead(GPIO_PORTD_BASE, GPIO_PIN_2);
+ if(valor == 1){
+
+     Retroceder();
+ }else if (valor == 0){
 
     LeerBluetooth();
     DireccionesTodas();
@@ -115,6 +120,7 @@ int main(void)
     ConfiguracionLuces();
     PWMPulseWidthSet(PWM1_BASE, PWM_OUT_0, pwmNow);
     PWMPulseWidthSet(PWM1_BASE, PWM_OUT_1, pwmNow);
+ }
   };
   UARTDisable(UART1_BASE);
 }
@@ -339,37 +345,10 @@ void ConfiguracionLuces()
     GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0b11000000);
   }
 }
-void Sensores(){
-    valor = GPIOPinRead(GPIO_PORTD_BASE, GPIO_PIN_2);
-    if ( valor ==  1)
-    {
-    Retroceder();
-    SysCtlDelay(10000000);
 
-    }
-    else if ( valor ==  16)
-    {
-    Retroceder();
-    SysCtlDelay(10000000);
-    Adelante();
-    SysCtlDelay(10000);
-    }
-    else if ( valor ==  0)
-    {
-    Retroceder();
-    SysCtlDelay(10000000);
-    }
-    else
-    {
-        DireccionesTodas();
-    }
-
-}
 void LeerBluetooth()
 {
-  while (!UARTCharsAvail(UART3_BASE)){
-      Sensores();
-  }
+  while (!UARTCharsAvail(UART3_BASE))
   data = UARTCharGetNonBlocking(UART3_BASE);
 }
 
