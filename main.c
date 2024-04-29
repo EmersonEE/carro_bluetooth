@@ -107,10 +107,8 @@ int main(void)
   while (1)
   {
 
-
     LeerBluetooth();
     DireccionesTodas();
-
     LED = 0;
     ConfiguracionLuces();
     PWMPulseWidthSet(PWM1_BASE, PWM_OUT_0, pwmNow);
@@ -121,35 +119,41 @@ int main(void)
 
 void Adelante()
 {
+    //// izquierda
   LED = 2;
   GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, LED);
-  GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, 0b00000101);
+  GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, 0b00000110);
+
   bluetoothSendMessage("\nTiva send = ADELANTE\n");
   SysCtlDelay(100);
 }
 
 void Retroceder()
 {
+    // Derecha
   LED = 4;
   GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, LED);
-  GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, 0b00001010);
+  GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, 0b00001001);
+
   bluetoothSendMessage("\nTiva send = REVERSA\n");
   SysCtlDelay(100);
 }
 
 void Derecha()
 {
+    // Retroceder
   LED = 8;
   GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, LED);
-  GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, 0b00001001);
+  GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, 0b00001010);
   bluetoothSendMessage("\nTiva send = DERECHA\n");
   SysCtlDelay(100);
 }
 void Izquierda()
 {
+     // Adelante
   LED = 12;
   GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, LED);
-  GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, 0b00000110);
+  GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, 0b00000101);
   bluetoothSendMessage("\nTiva send = IZQUIERDA\n");
   SysCtlDelay(100);
 }
@@ -341,23 +345,10 @@ void ConfiguracionLuces()
 }
 void Sensores(){
     valor = GPIOPinRead(GPIO_PORTD_BASE, GPIO_PIN_2);
-    if ( valor ==  1)
+     if ( valor ==  0)
     {
     Retroceder();
-    SysCtlDelay(10000000);
-
-    }
-    else if ( valor ==  16)
-    {
-    Retroceder();
-    SysCtlDelay(10000000);
-    Adelante();
-    SysCtlDelay(10000);
-    }
-    else if ( valor ==  0)
-    {
-    Retroceder();
-    SysCtlDelay(10000000);
+    SysCtlDelay(6000000);
     }
     else
     {
